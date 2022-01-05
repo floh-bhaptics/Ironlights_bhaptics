@@ -26,6 +26,8 @@ namespace Ironlights_bhaptics
             hitTimer.Start();
         }
 
+        #region Heartbeat and Movement
+
         [HarmonyPatch(typeof(Fighter), "Retreat", new Type[] { })]
         public class bhaptics_Retreat
         {
@@ -57,7 +59,9 @@ namespace Ironlights_bhaptics
                 tactsuitVr.PlaybackHaptics("Blitz");
             }
         }
+        #endregion
 
+        #region Take damage
         private static KeyValuePair<float, float> getAngleAndShift(Transform player, Vector3 hit)
         {
             // bhaptics pattern starts in the front, then rotates to the left. 0° is front, 90° is left, 270° is right.
@@ -129,22 +133,9 @@ namespace Ironlights_bhaptics
                 if (__instance.type == FighterCollisionType.Head) tactsuitVr.PlaybackHaptics("HitInTheFace");
             }
         }
+#endregion
 
-        /*
-        [HarmonyPatch(typeof(RangedAttack), "ShootProjectile", new Type[] { typeof(ProjectileFireData) })]
-        public class bhaptics_ShootProjectile
-        {
-            [HarmonyPostfix]
-            public static void Postfix(RangedAttack __instance)
-            {
-                bool isRightHand = false;
-                if (__instance.w.MainHand.controller == TButt.TBInput.Controller.RHandController) isRightHand = true;
-                if (__instance.w.testingOffHand) isRightHand = !isRightHand;
-                //if (!__instance.isHost) return;
-                tactsuitVr.Recoil("Blade", isRightHand);
-            }
-        }
-        */
+        #region Blade recoil
         [HarmonyPatch(typeof(Weapon), "RumblePulse", new Type[] { typeof(float), typeof(float) })]
         public class bhaptics_RumblePulse
         {
@@ -165,6 +156,6 @@ namespace Ironlights_bhaptics
                 //tactsuitVr.LOG(" ");
             }
         }
-
+        #endregion
     }
 }
