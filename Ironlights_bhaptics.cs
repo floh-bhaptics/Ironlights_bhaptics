@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 using MelonLoader;
 using HarmonyLib;
@@ -15,12 +16,14 @@ namespace Ironlights_bhaptics
     public class Ironlights_bhaptics : MelonMod
     {
         public static TactsuitVR tactsuitVr;
+        public static Stopwatch hitTimer = new Stopwatch();
 
         public override void OnApplicationStart()
         {
             base.OnApplicationStart();
             tactsuitVr = new TactsuitVR();
             tactsuitVr.PlaybackHaptics("HeartBeat");
+            hitTimer.Start();
         }
 
         [HarmonyPatch(typeof(Fighter), "Retreat", new Type[] { })]
@@ -84,8 +87,9 @@ namespace Ironlights_bhaptics
             // and the torso ends at roughly -0.5 (that's in meters)
             // so cap the shift to [-0.5, 0]...
             float hitShift = hitPosition.y;
-            float upperBound = 0.0f;
-            float lowerBound = -0.5f;
+            //tactsuitVr.LOG("HitShift: " + hitShift.ToString());
+            float upperBound = 1.6f;
+            float lowerBound = 0.5f;
             if (hitShift > upperBound) { hitShift = 0.5f; }
             else if (hitShift < lowerBound) { hitShift = -0.5f; }
             // ...and then spread/shift it to [-0.5, 0.5]
@@ -108,9 +112,57 @@ namespace Ironlights_bhaptics
             {
                 if (!__instance.isHost) return;
                 if (__instance.health <= 0.25f * __instance.maxHealth) tactsuitVr.StartHeartBeat();
+                else { tactsuitVr.StopHeartBeat(); }
                 Transform myPlayer = __instance.transform;
                 var angleShift = getAngleAndShift(myPlayer, point);
                 tactsuitVr.PlayBackHit("Impact", angleShift.Key, angleShift.Value);
+            }
+        }
+
+        [HarmonyPatch(typeof(FighterCollision), "RecordHit", new Type[] { typeof(int), typeof(float), typeof(Vector3), typeof(Vector3), typeof(bool) })]
+        public class bhaptics_CollisionRecordHit
+        {
+            [HarmonyPostfix]
+            public static void Postfix(FighterCollision __instance, int frame, float dmg, Vector3 localPos, Vector3 localNormal, bool replayCalc)
+            {
+                if (!__instance.fighter.isHost) return;
+                if (__instance.type == FighterCollisionType.Head) tactsuitVr.PlaybackHaptics("HitInTheFace");
+            }
+        }
+
+        /*
+        [HarmonyPatch(typeof(RangedAttack), "ShootProjectile", new Type[] { typeof(ProjectileFireData) })]
+        public class bhaptics_ShootProjectile
+        {
+            [HarmonyPostfix]
+            public static void Postfix(RangedAttack __instance)
+            {
+                bool isRightHand = false;
+                if (__instance.w.MainHand.controller == TButt.TBInput.Controller.RHandController) isRightHand = true;
+                if (__instance.w.testingOffHand) isRightHand = !isRightHand;
+                //if (!__instance.isHost) return;
+                tactsuitVr.Recoil("Blade", isRightHand);
+            }
+        }
+        */
+        [HarmonyPatch(typeof(Weapon), "RumblePulse", new Type[] { typeof(float), typeof(float) })]
+        public class bhaptics_RumblePulse
+        {
+            [HarmonyPostfix]
+            public static void Postfix(Weapon __instance, float strength, float length)
+            {
+                if (!__instance.fighter.isHost) return;
+                if (hitTimer.ElapsedMilliseconds <= 1000) return;
+                else { hitTimer.Restart(); }
+                bool isRightHand = false;
+                bool twoHanded = false;
+                if (__instance.MainHand.controller == TButt.TBInput.Controller.RHandController) isRightHand = true;
+                if (__instance.testingOffHand) twoHanded = true;
+                //if ((strength == 0.75f) && (length == 0.2f)) { tactsuitVr.PlaybackHaptics("ChargeBlade"); return; }
+                tactsuitVr.Recoil("Blade", isRightHand, twoHanded);
+                //tactsuitVr.LOG("S: " + strength.ToString());
+                //tactsuitVr.LOG("L: " + length.ToString());
+                //tactsuitVr.LOG(" ");
             }
         }
 

@@ -111,11 +111,12 @@ namespace MyBhapticsTactsuit
             bHaptics.SubmitRegistered(key, key, scaleOption, rotationOption);
         }
 
-        public void Recoil(string weaponName, bool isRightHand, float intensity = 1.0f)
+        public void Recoil(string weaponName, bool isRightHand, bool twoHanded, float intensity = 1.0f)
         {
             // weaponName is a parameter that will go into the vest feedback pattern name
             // isRightHand is just which side the feedback is on
             // intensity should usually be between 0 and 1
+
 
             float duration = 1.0f;
             var scaleOption = new bHaptics.ScaleOption(intensity, duration);
@@ -123,18 +124,27 @@ namespace MyBhapticsTactsuit
             var rotationFront = new bHaptics.RotationOption(0f, 0f);
             // make postfix according to parameter
             string postfix = "_L";
-            if (isRightHand) { postfix = "_R"; }
+            string otherPostfix = "_R";
+            if (isRightHand) { postfix = "_R"; otherPostfix = "_L"; }
 
             // stitch together pattern names for Arm and Hand recoil
-            string keyHands = "RecoilHands" + postfix;
+            string keyHand = "RecoilHands" + postfix;
             string keyArm = "Recoil" + postfix;
+            string keyOtherHand = "RecoilHands" + otherPostfix;
+            string keyOtherArm = "Recoil" + otherPostfix;
             // vest pattern name contains the weapon name. This way, you can quickly switch
             // between swords, pistols, shotguns, ... by just changing the shoulder feedback
             // and scaling via the intensity for arms and hands
             string keyVest = "Recoil" + weaponName + "Vest" + postfix;
-            bHaptics.SubmitRegistered(keyHands, keyHands, scaleOption, rotationFront);
+            if ((bHaptics.IsPlaying(keyArm)) | (bHaptics.IsPlaying(keyHand)) | (bHaptics.IsPlaying(keyVest))) return;
+            bHaptics.SubmitRegistered(keyHand, keyHand, scaleOption, rotationFront);
             bHaptics.SubmitRegistered(keyArm, keyArm, scaleOption, rotationFront);
             bHaptics.SubmitRegistered(keyVest, keyVest, scaleOption, rotationFront);
+            if (twoHanded)
+            {
+                bHaptics.SubmitRegistered(keyOtherHand, keyOtherHand, scaleOption, rotationFront);
+                bHaptics.SubmitRegistered(keyOtherArm, keyOtherArm, scaleOption, rotationFront);
+            }
         }
 
 
