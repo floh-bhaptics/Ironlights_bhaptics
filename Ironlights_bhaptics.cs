@@ -157,5 +157,24 @@ namespace Ironlights_bhaptics
             }
         }
         #endregion
+
+        #region Powerup
+
+        [HarmonyPatch(typeof(Fighter), "ManualUpdate", new Type[] { })]
+        public class bhaptics_PowerUp
+        {
+            [HarmonyPostfix]
+            public static void Postfix(Fighter __instance)
+            {
+                if (!__instance.isHost) return;
+                if (__instance.isChargingUp)
+                {
+                    if (!tactsuitVr.IsPlaying("PowerCharge")) tactsuitVr.PlaybackHaptics("PowerCharge");
+                }
+                
+            }
+        }
+
+        #endregion
     }
 }
