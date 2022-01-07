@@ -49,6 +49,26 @@ namespace Ironlights_bhaptics
             }
         }
 
+        [HarmonyPatch(typeof(Fighter), "CleanUp", new Type[] { })]
+        public class bhaptics_CleanUp
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                tactsuitVr.StopThreads();
+            }
+        }
+
+        [HarmonyPatch(typeof(Fighter), "Reset", new Type[] { })]
+        public class bhaptics_Reset
+        {
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                tactsuitVr.StopThreads();
+            }
+        }
+
         [HarmonyPatch(typeof(Fighter), "Blitz", new Type[] { })]
         public class bhaptics_Blitz
         {
@@ -115,6 +135,8 @@ namespace Ironlights_bhaptics
             public static void Postfix(Fighter __instance, float damage, Vector3 point, Vector3 normal, bool extraDamage, bool doublehit)
             {
                 if (!__instance.isHost) return;
+                if (!__instance.enabled) return;
+                if (__instance.dead) return;
                 if (__instance.health <= 0.25f * __instance.maxHealth) tactsuitVr.StartHeartBeat();
                 else { tactsuitVr.StopHeartBeat(); }
                 Transform myPlayer = __instance.transform;

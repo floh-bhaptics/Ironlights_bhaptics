@@ -16,7 +16,7 @@ using MelonLoader;
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-[assembly: MelonInfo(typeof(Ironlights_bhaptics.Ironlights_bhaptics), "Ironlights_bhaptics", "1.0", "Florian Fahrenberger")]
+[assembly: MelonInfo(typeof(Ironlights_bhaptics.Ironlights_bhaptics), "Ironlights_bhaptics", "1.1", "Florian Fahrenberger")]
 [assembly: MelonGame("E McNeill", "Ironlights")]
 
 
