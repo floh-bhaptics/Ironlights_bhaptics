@@ -10,6 +10,7 @@ using HarmonyLib;
 using UnityEngine;
 
 using MyBhapticsTactsuit;
+using Il2Cpp;
 
 [assembly: MelonInfo(typeof(Ironlights_bhaptics.Ironlights_bhaptics), "Ironlights_bhaptics", "1.1", "Florian Fahrenberger")]
 [assembly: MelonGame("E McNeill", "Ironlights")]
@@ -19,12 +20,11 @@ namespace Ironlights_bhaptics
 {
     public class Ironlights_bhaptics : MelonMod
     {
-        public static TactsuitVR tactsuitVr;
+        public static TactsuitVR tactsuitVr = null!;
         public static Stopwatch hitTimer = new Stopwatch();
 
-        public override void OnApplicationStart()
+        public override void OnInitializeMelon()
         {
-            base.OnApplicationStart();
             tactsuitVr = new TactsuitVR();
             tactsuitVr.PlaybackHaptics("HeartBeat");
             hitTimer.Start();
@@ -173,7 +173,7 @@ namespace Ironlights_bhaptics
                 else { hitTimer.Restart(); }
                 bool isRightHand = false;
                 bool twoHanded = false;
-                if (__instance.MainHand.controller == TButt.TBInput.Controller.RHandController) isRightHand = true;
+                if (__instance.MainHand.controller == Il2CppTButt.TBInput.Controller.RHandController) isRightHand = true;
                 if (__instance.testingOffHand) twoHanded = true;
                 //if ((strength == 0.75f) && (length == 0.2f)) { tactsuitVr.PlaybackHaptics("ChargeBlade"); return; }
                 tactsuitVr.Recoil("Blade", isRightHand, twoHanded);
