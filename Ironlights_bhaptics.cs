@@ -12,7 +12,7 @@ using UnityEngine;
 using MyBhapticsTactsuit;
 using Il2Cpp;
 
-[assembly: MelonInfo(typeof(Ironlights_bhaptics.Ironlights_bhaptics), "Ironlights_bhaptics", "2.0.0", "Florian Fahrenberger")]
+[assembly: MelonInfo(typeof(Ironlights_bhaptics.Ironlights_bhaptics), "Ironlights_bhaptics", "2.0.1", "Florian Fahrenberger")]
 [assembly: MelonGame("E McNeill", "Ironlights")]
 
 
@@ -63,7 +63,7 @@ namespace Ironlights_bhaptics
             }
         }
 
-        [HarmonyPatch(typeof(Fighter), "Reset", new Type[] { })]
+        [HarmonyPatch(typeof(Fighter), "Reset", new Type[] { typeof(bool) })]
         public class bhaptics_Reset
         {
             [HarmonyPostfix]
